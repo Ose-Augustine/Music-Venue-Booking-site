@@ -3,6 +3,18 @@
 {% block content %}
 <div class="row">
 	<div class="col-sm-6">
+		<div><strong>Recently listed venues</strong> </div>
+		{% for venue in recent_venues %}
+		<ul>
+			<li>{{venue.name}}</li>
+		</ul>
+		{% endfor %}
+		<div><strong>Recently listed Artists</strong></div>
+	{% for artist in recent_artists %}
+	<ul>
+		<li>{{artist.name}}</li>
+	</ul>
+	{% endfor %}
 		<h1>Fyyur 🔥</h1>
 		<p class="lead">Where musical artists meet musical venues.</p>
 		<h3>

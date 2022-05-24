@@ -283,6 +283,7 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  form = ArtistForm()
   info = Artist.query.get(artist_id)
   info.name = request.form.get('name')
   info.city = request.form.get('city','')
@@ -297,10 +298,10 @@ def edit_artist_submission(artist_id):
 
   try:
     db.session.commit()
-    flash('Edit was successful')
+    flash('Edit was successful for {form.name.data}')
   except:
     db.session.rollback()
-    return "There was an error"
+    flash(f"There was an error editing {form.name.data}")
   finally:
     db.session.close()
 
@@ -337,9 +338,6 @@ def edit_venue_submission(venue_id):
   finally:
    db.session.close()
 
-
-  # TODO: take values from the form submitted, and update existing
-  # venue record with ID <venue_id> using the new attributes
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
@@ -352,14 +350,27 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+  form = ArtistForm()
+  person = Artist()
+  person.genres=form.genres.data
+  person.name= form.name.data
+  person.city = form.city.data
+  person.phone = form.phone.data
+  person.facebook_link = form.facebook_link.data
+  person.website_link = form.website_link.data
+  person.image_link = form.image_link.data
+  person.seeking_venue = form.seeking_venue.data
+  person.seeking_description = form.seeking_description.data
+  
+  try:
+    db.session.add(person)
+    db.session.commit()
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  except:
+    flash(f'An error occured recording data for {form.name.data}')
+    db.session.rollback()
+  finally:
+    db.session.close()
   return render_template('pages/home.html')
 
 

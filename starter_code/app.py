@@ -310,25 +310,34 @@ def edit_artist_submission(artist_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   form = VenueForm()
-  venue={
-    "id": 1,
-    "name": "The Musical Hop",
-    "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-    "address": "1015 Folsom Street",
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "123-123-1234",
-    "website": "https://www.themusicalhop.com",
-    "facebook_link": "https://www.facebook.com/TheMusicalHop",
-    "seeking_talent": True,
-    "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-    "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
-  }
-  # TODO: populate form with values from venue with ID <venue_id>
+  venue = Venue.query.filter_by(id=venue_id).first()
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  form = VenueForm()
+  data = Venue.query.get(venue_id)
+  data.name = request.form.get('name')
+  data.city = request.form.get('city','')
+  data.state = request.form.get('state','')
+  data.address = request.form.get('address','')
+  data.phone = request.form.get('phone','')
+  data.facebook_link = request.form.get('facebook_link','')
+  data.image_link = request.form.get('image_link','')
+  data.website_link = request.form.get('website_link','')
+  data.seeking_talent = request.form.get('seeking_talent','')
+  data.seeking_description = request.form.get('seeking_description',' ')
+  
+  try:
+    db.session.commit()
+    flash(f'Edit was successful on{form.name.data}')
+  except:
+    db.session.rollback()
+    flash(f"There was an error editing {form.name.data}")
+  finally:
+   db.session.close()
+
+
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
   return redirect(url_for('show_venue', venue_id=venue_id))

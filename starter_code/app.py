@@ -81,7 +81,8 @@ class Show(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   artist_id = db.Column(db.Integer,db.ForeignKey('artist.id'))
   venue_id  = db.Column(db.Integer,db.ForeignKey('venue.id'))
-  start_time = db.Column(db.Date)
+  start_time = db.Column(db.DateTime(timezone=True))
+  
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -111,7 +112,7 @@ app.jinja_env.filters['datetime'] = format_datetime
 def index():
   recent_venues = Venue.query.order_by(Venue.creation_time).limit(5).all()
   recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
-  return render_template('pages/home.html')
+  return render_template('pages/home.html', recent_venues=recent_venues, recent_artists=recent_artists)
 
 
 #  Venues
@@ -182,6 +183,9 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  #show recents along with submission
+  recent_venues = Venue.query.order_by(Venue.creation_time).limit(5).all()
+  recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
   venue_instance = Venue()
   venue_instance.name = request.form.get('name')
   venue_instance.city = request.form.get('city')
@@ -200,12 +204,10 @@ def create_venue_submission():
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
   except:
     db.session.rollback()
-  finally:
-    db.session.close()
 
-  return render_template('pages/home.html')
+  return render_template('pages/home.html',recent_artists=recent_artists,recent_venues=recent_venues)
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<venue_id>/delete')
 def delete_venue(venue_id):
   to_delete= Venue.query.get(venue_id)
   try:
@@ -350,6 +352,8 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+  recent_venues = Venue.query.order_by(Venue.creation_time).limit(5).all()
+  recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
   form = ArtistForm()
   person = Artist()
   person.genres=form.genres.data
@@ -369,9 +373,7 @@ def create_artist_submission():
   except:
     flash(f'An error occured recording data for {form.name.data}')
     db.session.rollback()
-  finally:
-    db.session.close()
-  return render_template('pages/home.html')
+  return render_template('pages/home.html',recent_artists=recent_artists,recent_venues=recent_venues)
 
 
 #  Shows
@@ -390,6 +392,8 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+  recent_venues = Venue.query.order_by(Venue.creation_time).limit(5).all()
+  recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
   artist_id = request.form.get('artist_id')
   venue_id = request.form.get('venue_id')
   start_time = request.form.get('start_time')
@@ -404,9 +408,7 @@ def create_show_submission():
   except:
     db.session.rollback()
     flash ('Could not register your show')
-  finally:
-    db.session.close()
-  return render_template('pages/home.html')
+  return render_template('pages/home.html',recent_artists=recent_artists,recent_venues=recent_venues)
 
 @app.errorhandler(404)
 def not_found_error(error):

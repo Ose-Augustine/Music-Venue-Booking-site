@@ -13,6 +13,9 @@ from flask_migrate import Migrate
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from sqlalchemy.ext.mutable import MutableList 
+from sqlalchemy import PickleType
+from sqlalchemy.sql import func 
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -40,6 +43,16 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    seeking_talent = db.Column(db.String())
+    seeking_description = db.Column(db.String())
+    website_link = db.Column(db.String())
+    upcoming_shows_count = db.Column(db.Integer)
+    past_shows = db.Column(MutableList.as_mutable(db.PickleType), default=[])
+    past_shows_count = db.Column(db.Integer)
+    upcoming_shows = db.Column(MutableList.as_mutable(db.PickleType), default=[])
+    shows = db.relationship('Show',backref='venue',lazy=True)
+    creation_time = db.Column(db.DateTime(timezone=True),server_default = func.now())
+
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -54,7 +67,21 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    seeking_venue = db.Column(db.String())
+    seeking_description = db.Column(db.String())
+    website_link = db.Column(db.String())
+    upcoming_shows_count = db.Column(db.Integer)
+    upcoming_shows = db.Column(MutableList.as_mutable(db.PickleType), default=[])
+    past_shows = db.Column(MutableList.as_mutable(db.PickleType),default=[])
+    past_shows_count = db.Column(db.Integer)
+    shows = db.relationship('Show',backref='artist',lazy=True)
+    creation_time = db.Column(db.DateTime(timezone=True),server_default = func.now())
 
+class Show(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  artist_id = db.Column(db.Integer,db.ForeignKey('artist.id'))
+  venue_id  = db.Column(db.Integer,db.ForeignKey('venue.id'))
+  start_time = db.Column(db.Date)
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.

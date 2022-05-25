@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------#
 
 import json
+import pytz
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -149,7 +150,8 @@ def show_venue(venue_id):
   current_data = []
   past_data = []
   for result in query:
-    if result.start_time >= datetime.now().date():
+    time_zone_aware = pytz.utc.localize(datetime.now())
+    if result.start_time >= time_zone_aware:
       info = {
         'artist_id':result.artist_id,
         'artist_name':result.artist.name,
@@ -252,7 +254,8 @@ def show_artist(artist_id):
   current_data = []
   past_data = []
   for result in query:
-    if result.start_time >= datetime.now().date():
+    time_zone_aware = pytz.utc.localize(datetime.now())
+    if result.start_time >= time_zone_aware:
       info = {
         'venue_id':result.venue_id,
         'venue_name':result.venue.name,

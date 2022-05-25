@@ -77,6 +77,7 @@ class Artist(db.Model):
     past_shows_count = db.Column(db.Integer)
     shows = db.relationship('Show',backref='artist',lazy=True)
     creation_time = db.Column(db.DateTime(timezone=True),server_default = func.now())
+    available_times = db.Column(MutableList.as_mutable(db.Time))
 
 class Show(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -256,7 +257,7 @@ def show_artist(artist_id):
   for result in query:
     time_zone_aware = pytz.utc.localize(datetime.now())
     if result.start_time >= time_zone_aware:
-      info = {
+      info = { 
         'venue_id':result.venue_id,
         'venue_name':result.venue.name,
         'start_time':result.start_time,

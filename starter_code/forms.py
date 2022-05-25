@@ -131,7 +131,7 @@ class VenueForm(Form):
 class Available(Form):
     available_time1 = TimeField('available_time1')
     available_time2 = TimeField('available_time2')
-    availble_time3  = TimeField('available_time3')
+    available_time3  = TimeField('available_time3')
 
 class ArtistForm(Form):
     name = StringField(

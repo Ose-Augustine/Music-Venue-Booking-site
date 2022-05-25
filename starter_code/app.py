@@ -77,7 +77,7 @@ class Artist(db.Model):
     past_shows_count = db.Column(db.Integer)
     shows = db.relationship('Show',backref='artist',lazy=True)
     creation_time = db.Column(db.DateTime(timezone=True),server_default = func.now())
-    available_times = db.Column(MutableList.as_mutable(db.Time))
+    available_times = db.Column(MutableList.as_mutable(db.PickleType),default=[])
 
 class Show(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -304,7 +304,7 @@ def edit_artist_submission(artist_id):
 
   try:
     db.session.commit()
-    flash('Edit was successful for {form.name.data}')
+    flash(f'Edit was successful for {form.name.data}')
   except:
     db.session.rollback()
     flash(f"There was an error editing {form.name.data}")
@@ -360,6 +360,11 @@ def create_artist_submission():
   recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
   form = ArtistForm()
   person = Artist()
+  available1 = form.available_times.available_time1.data 
+  available2 = form.available_times.available_time2.data 
+  available3 = form.available_times.available_time3.data 
+  available_times_list =[available1,available2,available3]
+  person.available_times = available_times_list
   person.genres=form.genres.data
   person.name= form.name.data
   person.city = form.city.data

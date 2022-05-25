@@ -292,6 +292,10 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   form = ArtistForm()
   info = Artist.query.get(artist_id)
+  available1 = str(form.available_times.time1.data)
+  available2 = str(form.available_times.time2.data)
+  available_times_list =[available1,available2]
+  info.available_times = available_times_list
   info.name = request.form.get('name')
   info.city = request.form.get('city','')
   info.state = request.form.get('state','')

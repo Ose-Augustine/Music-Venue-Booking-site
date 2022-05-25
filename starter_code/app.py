@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------#
 
 import json
+from typing import final
 import pytz
 import dateutil.parser
 import babel
@@ -360,14 +361,14 @@ def create_artist_submission():
   recent_artists = Artist.query.order_by(Artist.creation_time).limit(5).all()
   form = ArtistForm()
   person = Artist()
-  available1 = form.available_times.available_time1.data 
-  available2 = form.available_times.available_time2.data 
-  available3 = form.available_times.available_time3.data 
-  available_times_list =[available1,available2,available3]
+  available1 = str(form.available_times.time1.data)
+  available2 = str(form.available_times.time2.data)
+  available_times_list =[available1,available2]
   person.available_times = available_times_list
   person.genres=form.genres.data
   person.name= form.name.data
   person.city = form.city.data
+  person.state = form.state.data
   person.phone = form.phone.data
   person.facebook_link = form.facebook_link.data
   person.website_link = form.website_link.data
@@ -408,15 +409,19 @@ def create_show_submission():
   start_time = request.form.get('start_time')
   venue_instance = Venue.query.get(venue_id)
   artist_instance = Artist.query.get(artist_id)
-  new_show = Show(venue=venue_instance,artist=artist_instance,start_time=start_time)
+  if str(start_time) in artist_instance.available_times:
+    new_show = Show(venue=venue_instance,artist=artist_instance,start_time=start_time)
+    try:
+      db.session.add(new_show)
+      db.session.commit()
+      flash (f'Show Venue:{new_show.venue.name} was successfully listed')
+    except:
+      db.session.rollback()
+      flash ('Could not register your show')
 
-  try:
-    db.session.add(new_show)
-    db.session.commit()
-    flash (f'Show Venue:{new_show.venue.name} was successfully listed')
-  except:
-    db.session.rollback()
-    flash ('Could not register your show')
+  else:
+    flash(f'Artist {artist_instance.name} would not be available by {start_time}. Refer to the artists page to see available times')
+   
   return render_template('pages/home.html',recent_artists=recent_artists,recent_venues=recent_venues)
 
 @app.errorhandler(404)

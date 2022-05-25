@@ -15,12 +15,12 @@
 			{% endfor %}
 		</div>
 		<div>
-			<strong>Available Times</strong>
-			{% for time in artist.available_times %} 
+			<strong>Available Times</strong> 
 			<ul>
+				{% for time in artist.available_times %} 
 				<li>{{time}}</li>
+				{% endfor %}
 			</ul>
-			{% endfor %}
 		</div>
 		<p>
 			<i class="fas fa-globe-americas"></i> {{ artist.city }}, {{ artist.state }}
